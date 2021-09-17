@@ -54,7 +54,7 @@
             e.preventDefault();
 
             var image = $("#base64Code").val();
-            var base64ImageContent = image.replace(/^data:image\/(png|jpg);base64,/, "");
+            var base64ImageContent = image.replace(/^data:image\/(png|jpg|jpeg);base64,/, "");
 
             var product = {'image': base64ImageContent};
             $.ajax({
@@ -72,8 +72,6 @@
 
                     $("#modal-body").append("<p>"+obj['message']+"</>");
                     $("#modal").modal("show");
-                    {#console.log(data);#}
-
                 }
             })
         })

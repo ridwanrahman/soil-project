@@ -150,13 +150,14 @@ def testing(request):
     image = request.body.decode("UTF-8")
     json_image = json.loads(image)
     TESTDATADIR = str(Path(__file__).resolve().parent.parent) + '/soil/TestColor'
-    TESTDATADIR = TESTDATADIR + '/image.jpeg'
+    TESTDATADIR = TESTDATADIR + '/image.jpg'
     decodeit = open(TESTDATADIR, 'wb')
     decodeit.write(base64.b64decode((json_image['image'])))
     decodeit.close()
 
     TESTDATADIR = str(Path(__file__).resolve().parent.parent) + '/soil/TestColor'
     model = pickle.load(open('img_model.p', 'rb'))
+    data_to_send = ""
     for img in os.listdir(TESTDATADIR):
         try:
             img_array = imread(os.path.join(TESTDATADIR, img))
@@ -166,10 +167,12 @@ def testing(request):
             for ind, val in enumerate(CATEGORIES):
                 print(f'{val} = {probability[0][ind] * 100}%')
             print("The predicted color is : " + CATEGORIES[model.predict(l)[0]])
+            data_to_send = "The predicted color is : " + CATEGORIES[model.predict(l)[0]]
         except Exception as e:
             print(e)
+    print(data_to_send)
+    response = JsonResponse({'message': data_to_send})
 
-    response = JsonResponse({'message': CATEGORIES[model.predict(l)[0]]})
     return response
 
 
