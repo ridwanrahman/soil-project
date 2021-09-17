@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <input type='hidden' name='csrfmiddlewaretoken' id="hidden-input" value='{{ csrf_token }}' />
+
+    <form class="form-horizontal" id="myform" enctype="multipart/form-data">
+        <input type="file" name="file" id="file" onchange="encodeImgtoBase64(this)">
+        <button type="submit" id="submit-button">Submit</button>
+        <br><br>
+        <textarea id="base64Code" rows="15" cols="68"></textarea>
+        <br><br>
+        <img src="" id="base64Img" width="500">
+    </form>
+
+
+    <!-- Modal -->
+<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Result</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="modal-body">
+
+      </div>
+      <div class="modal-footer">
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        var reader = new FileReader();
+        function encodeImgtoBase64(element) {
+            var file = element.files[0];
+
+            reader.onloadend = function() {
+              $("#base64Code").val(reader.result);
+              $("#convertImg").text(reader.result);
+              $("#base64Img").attr("src", reader.result);
+            }
+            reader.readAsDataURL(file);
+        }
+        $(document).ready(function () {
+            $("#modal").modal("hide");
+        })
+
+        $("#submit-button").click(function(e) {
+            e.preventDefault();
+
+            var image = $("#base64Code").val();
+            var base64ImageContent = image.replace(/^data:image\/(png|jpg);base64,/, "");
+
+            var product = {'image': base64ImageContent};
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: "http://localhost:8000/soil/get-test-result",
+                contentType:'application/json',
+                data: JSON.stringify(product),
+                success: function(data){
+                     $("#modal-body").html("");
+                    console.log(typeof(data))
+                    var obj = JSON.stringify(data)
+                    var obj = JSON.parse(obj);
+                    console.log(obj['message'])
+
+                    $("#modal-body").append("<p>"+obj['message']+"</>");
+                    $("#modal").modal("show");
+                    {#console.log(data);#}
+
+                }
+            })
+        })
+    </script>
+
+
+{% endblock %}
